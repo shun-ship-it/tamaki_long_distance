@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101a2b">
+<title>田槙の長距離トレーニング</title>
+<style>
+:root{--bg:#101a2b;--panel:#18263a;--line:#344963;--cream:#fff4d6;--yellow:#ffd45c;--mint:#8de0bb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--cream);font-family:ui-monospace,"SFMono-Regular",Consolas,monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+body{display:flex;align-items:center;justify-content:center}
+#app{width:min(100vw,560px);height:100dvh;max-height:960px;display:flex;flex-direction:column;background:#101a2b;overflow:hidden;position:relative}
+header{padding:calc(env(safe-area-inset-top) + 10px) 14px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:58px}
+.brand{font-weight:900;letter-spacing:.03em;font-size:clamp(13px,3.8vw,17px);line-height:1.2}
+.tag{font-size:10px;color:#9eb2ca;border:1px solid #344963;padding:5px 7px;border-radius:4px;white-space:nowrap}
+#hud{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 10px 8px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 5px;text-align:center;min-width:0}
+.stat small{display:block;color:#9eb2ca;font-size:9px;margin-bottom:3px}
+.stat strong{display:block;font-size:clamp(14px,4vw,19px);line-height:1.05;font-variant-numeric:tabular-nums}
+#trackWrap{position:relative;flex:1;min-height:0;margin:0 8px;border:2px solid #344963;border-radius:9px;overflow:hidden;background:#6aa66c}
+canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+#toast{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:#101a2bdf;border:1px solid #8093a8;border-radius:5px;padding:7px 11px;font-size:12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s}
+#toast.show{opacity:1}
+#bottom{padding:9px 12px calc(env(safe-area-inset-bottom) + 10px);background:#101a2b}
+#progress{height:8px;background:#2b3d54;border-radius:10px;overflow:hidden;margin-bottom:8px;border:1px solid #40536c}
+#bar{height:100%;width:0;background:linear-gradient(90deg,#75d8a5,#ffdb65);transition:width .15s}
+#controls{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:stretch}
+.control{height:58px;border:2px solid #536984;border-radius:9px;background:#1b2b41;color:var(--cream);font:900 20px ui-monospace,monospace;box-shadow:0 4px 0 #0a111c;touch-action:none}
+.control:active,.control.down{transform:translateY(3px);box-shadow:0 1px 0 #0a111c;background:#304765}
+#sprint{font-size:14px;color:#192238;background:#ffd45c;border-color:#fff0a6;line-height:1.15}
+#sprint small{display:block;font-size:9px;margin-top:3px}
+#hint{text-align:center;color:#8fa4bd;font-size:10px;margin-top:8px;line-height:1.4}
+#overlay{position:absolute;inset:0;background:#091321df;display:flex;align-items:center;justify-content:center;padding:18px;z-index:5}
+.dialog{width:min(100%,390px);background:#18263a;border:2px solid #7187a2;border-radius:12px;padding:20px 18px;text-align:center;box-shadow:0 10px 40px #0008}
+.pixelLogo{font-size:clamp(21px,6vw,30px);font-weight:1000;line-height:1.35;color:#ffdc70;text-shadow:3px 3px #8c542f;margin:4px 0 12px}
+.dialog p{font-size:12px;line-height:1.8;color:#c7d5e5;margin:8px 0 16px}
+.primary{width:100%;height:50px;border:0;border-radius:7px;background:#ffcf55;color:#1b2636;font:900 16px ui-monospace,monospace;box-shadow:0 4px 0 #a66b2b}
+.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #a66b2b}
+#resultStats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.resultCell{background:#101a2b;border:1px solid #344963;padding:9px;border-radius:6px;font-size:11px}
+.resultCell b{display:block;font-size:19px;color:#ffdc70;margin-top:4px}
+.hidden{display:none!important}
+@media(min-height:800px){#controls .control{height:66px}#hint{font-size:11px}}
+</style>
+</head>
+<body oncontextmenu="return false">
+<div id="app">
+<header><div class="brand">🏃 田槙の長距離トレーニング</div><div class="tag">尽誠学園高校 / RACE</div></header>
+<section id="hud">
+ <div class="stat"><small>距離</small><strong id="distance">0m</strong></div>
+ <div class="stat"><small>順位</small><strong id="rank">6/6</strong></div>
+ <div class="stat"><small>ペース</small><strong id="pace">4'30"</strong></div>
+ <div class="stat"><small>スタミナ</small><strong id="stamina">100%</strong></div>
+</section>
+<div id="trackWrap"><canvas id="game" aria-label="ランニングレース画面"></canvas><div id="toast">田槙！がんばれ！</div></div>
+<div id="bottom">
+ <div id="progress"><div id="bar"></div></div>
+ <div id="controls">
+  <button class="control" id="left" aria-label="左へ">◀</button>
+  <button class="control" id="sprint">ダッシュ！<small>長押しで加速</small></button>
+  <button class="control" id="right" aria-label="右へ">▶</button>
+ </div>
+ <div id="hint">左右ボタンでコース取り / ダッシュはスタミナを消費</div>
+</div>
+<div id="overlay">
+ <div class="dialog" id="startPanel">
+  <div class="pixelLogo">田槙の<br>長距離トレーニング</div>
+  <p>尽誠学園高校の代表として、ライバル5人と1600mレース！<br>左右に動いて走る位置を調整し、勝利を目指そう。<br>ダッシュはここぞという時に使おう！</p>
+  <button class="primary" id="start">レーススタート！</button>
+ </div>
+ <div class="dialog hidden" id="endPanel">
+  <div class="pixelLogo" id="resultTitle">FINISH!</div>
+  <p id="resultMessage">おつかれさま！</p>
+  <div id="resultStats">
+   <div class="resultCell">最終順位<b id="finalRank">--</b></div>
+   <div class="resultCell">走行タイム<b id="finalTime">--</b></div>
+  </div>
+  <button class="primary" id="again">もう一度走る</button>
+ </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
+const $=id=>document.getElementById(id);
+const names=['山田','佐藤','中村','高橋','小林'];
+let W=320,H=480, running=false, finished=false, last=0, elapsed=0, distance=0, stamina=100, lane=1, targetLane=1, sprinting=false, cheerTimer=0, racers=[], scenery=0, shake=0;
+const total=1600, laneX=[.32,.5,.68];
+function resize(){
+ const r=canvas.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
+ W=Math.max(200,Math.round(r.width*dpr));H=Math.max(260,Math.round(r.height*dpr));
+ canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=false;
+}
+window.addEventListener('resize',resize);resize();
+function rect(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function text(t,x,y,size,color='#fff4d6',align='center'){ctx.fillStyle=color;ctx.font=`bold ${size}px monospace`;ctx.textAlign=align;ctx.fillText(t,x,y);}
+function runner(x,y,s,color,shirt,number,player=false,phase=0){
+ // pixel-art runner viewed from behind
+ const u=s/16, px=Math.round(x), py=Math.round(y);
+ // shadow
+ rect(px-7*u,py+15*u,14*u,3*u,'#263a32');
+ // legs animate
+ const swing=Math.sin(phase)*2*u;
+ rect(px-5*u,py+8*u,4*u,7*u,'#26354c');
+ rect(px+1*u,py+8*u,4*u,7*u,'#26354c');
+ rect(px-5*u+swing,py+13*u,5*u,2*u,'#f1d7b1');
+ rect(px+1*u-swing,py+13*u,5*u,2*u,'#f1d7b1');
+ // arms
+ rect(px-8*u,py+3*u,3*u,7*u,shirt);
+ rect(px+5*u,py+3*u,3*u,7*u,shirt);
+ rect(px-8*u+Math.max(0,swing),py+8*u,3*u,3*u,'#e9b78f');
+ rect(px+5*u-Math.max(0,swing),py+8*u,3*u,3*u,'#e9b78f');
+ // torso
+ rect(px-6*u,py+2*u,12*u,9*u,shirt);
+ rect(px-5*u,py+10*u,10*u,2*u,color);
+ // neck/head
+ rect(px-2*u,py,4*u,3*u,'#d99d78');
+ rect(px-4*u,py-6*u,8*u,7*u,'#d99d78');
+ rect(px-5*u,py-7*u,10*u,3*u,'#302a35');
+ rect(px-4*u,py-9*u,8*u,3*u,'#302a35');
+ if(player){rect(px-2*u,py+4*u,4*u,3*u,'#fff4d6');text('T',px,py+9*u,Math.max(5,5*u),'#26354c');}
+ else {rect(px-2*u,py+4*u,4*u,3*u,'#fff4d6');}
+}
+function roadPoint(y){const t=y/H;const half=(.08+.43*t)*W;return [W/2-half,W/2+half];}
+function drawTrack(dt){
+ rect(0,0,W,H,'#75ad70');
+ // distant sky / trees
+ rect(0,0,W,H*.24,'#9bd1c0');
+ for(let i=0;i<12;i++){let x=(i*79-scenery*.3)%(W+70);rect(x-18,H*.18,36,H*.1,'#4e855c');rect(x-10,H*.12,20,H*.13,'#376b50');}
+ // track trapezoid
+ const top=H*.22,bottom=H*1.04;
+ let [tl,tr]=roadPoint(top),[bl,br]=roadPoint(bottom);
+ ctx.fillStyle='#b96f55';ctx.beginPath();ctx.moveTo(tl,top);ctx.lineTo(tr,top);ctx.lineTo(br,bottom);ctx.lineTo(bl,bottom);ctx.closePath();ctx.fill();
+ // lanes and dashed marks
+ for(let i=0;i<=3;i++){let f=i/3,x1=tl+(tr-tl)*f,x2=bl+(br-bl)*f;rect(x1,top,Math.max(1,W*.003),H*.82,'#f1c5a2');}
+ for(let k=0;k<14;k++){
+  let z=(k/14+(scenery%100)/100)%1,y=top+z*(bottom-top),[l,r]=roadPoint(y),dash=Math.max(2,W*.007)*(0.3+z);
+  for(let i=1;i<3;i++){let x=l+(r-l)*i/3;rect(x-dash/2,y,dash,Math.max(2,3*z*W/320),'#f8dfbd');}
+ }
+ // grass stripes
+ for(let i=0;i<8;i++){let y=(i*67+scenery*1.8)%(H*.8)+H*.2;rect(0,y,W*.07,2,'#5c9a60');rect(W*.93,y,W*.07,2,'#5c9a60');}
+ // distant finish arch hint
+ if(distance>1200){rect(W*.22,H*.23,3,H*.06,'#f5e7c4');rect(W*.78,H*.23,3,H*.06,'#f5e7c4');rect(W*.22,H*.23,W*.56,4,'#f5e7c4');}
+}
+function draw(){
+ const dpr=W/Math.max(1,canvas.clientWidth);ctx.save();ctx.scale(dpr,dpr);let w=canvas.clientWidth,h=canvas.clientHeight;
+ // use logical dimensions for drawing
+ const oldW=W,oldH=H;W=w;H=h;
+ drawTrack(0);
+ // rivals depth sorted: farther first
+ racers.slice().sort((a,b)=>a.z-b.z).forEach(r=>{
+  let y=H*(.28+r.z*.57), road=roadPoint(y),x=road[0]+(road[1]-road[0])*(.17+r.lane*.33);
+  let size=7+r.z*15;runner(x,y,size,'#f4d6b5',r.shirt,0,false,elapsed*8+r.phase);
+  if(r.z>.45){text(r.name,x,y-size*.95,Math.max(8,9*r.z),'#fff4d6');}
+ });
+ // player stays in foreground center lane position
+ let py=H*.78,road=roadPoint(py),px=road[0]+(road[1]-road[0])*laneX[lane];
+ runner(px,py,Math.min(24,H*.055),'#f4d6b5','#e6c34d',1,true,elapsed*11);
+ // small crowd cheer boards
+ if(cheerTimer>0){rect(W*.05,H*.34,W*.9,23,'#15263be8');text('コーチ「田槙！がんばれ！」',W/2,H*.34+16,Math.max(10,Math.min(14,W*.032)),'#ffe17b');}
+ W=oldW;H=oldH;ctx.restore();
+}
+function setToast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1200);}
+function init(){
+ elapsed=0;distance=0;stamina=100;lane=1;targetLane=1;scenery=0;cheerTimer=0;finished=false;
+ racers=names.map((n,i)=>({name:n,lane:i%3,z:.25+(i%2)*.08,progress:0,base:.91+Math.random()*.16,shirt:['#5e91c9','#d66d65','#67a98a','#9b78bb','#d49a55'][i],phase:i}));
+ updateHud();
+}
+function updateHud(){
+ $('distance').textContent=Math.floor(distance)+'m';
+ const ahead=racers.filter(r=>r.progress>distance).length;
+ $('rank').textContent=(ahead+1)+'/6';
+ let pace=sprinting ? '3:55' : '4:30';$('pace').textContent=pace;
+ $('stamina').textContent=Math.round(stamina)+'%';
+ $('bar').style.width=(distance/total*100)+'%';
+}
+function finish(){
+ running=false;finished=true;
+ const ahead=racers.filter(r=>r.progress>total).length,rank=ahead+1;
+ $('resultTitle').textContent=rank===1?'優勝！！':'FINISH!';
+ $('resultMessage').textContent=rank===1?'田槙、見事な走りだ！尽誠学園の勝利！':'最後までよく走った！次は順位アップを目指そう！';
+ $('finalRank').textContent=rank+'位 / 6位';
+ let m=Math.floor(elapsed/60),s=(elapsed%60).toFixed(1).padStart(4,'0');$('finalTime').textContent=m+':'+s;
+ $('overlay').classList.remove('hidden');$('startPanel').classList.add('hidden');$('endPanel').classList.remove('hidden');
+}
+function tick(now){
+ if(!running)return;
+ let dt=Math.min(.04,(now-last)/1000||0);last=now;elapsed+=dt;
+ const boost=sprinting&&stamina>1;
+ if(boost)stamina=Math.max(0,stamina-23*dt);else stamina=Math.min(100,stamina+8*dt);
+ const speed=boost?5.1:3.65;distance+=speed*dt*10;scenery+=speed*dt*12;
+ lane+=(targetLane-lane)*Math.min(1,dt*12);
+ racers.forEach((r,i)=>{r.progress+=((r.base*3.8)+(distance>1100?.2:0))*dt*10;r.z=.18+Math.max(0,1-(r.progress-distance+180)/420)*.66;r.z=Math.max(.16,Math.min(.83,r.z));});
+ cheerTimer=Math.max(0,cheerTimer-dt);
+ if(Math.random()<dt*.18){cheerTimer=1.2;setToast(['田槙！がんばれ！','いいペースだ！','最後まで粘れ！'][Math.floor(Math.random()*3)]);}
+ if(distance>=total){distance=total;updateHud();draw();finish();return;}
+ updateHud();draw();requestAnimationFrame(tick);
+}
+function start(){init();$('overlay').classList.add('hidden');running=true;last=performance.now();requestAnimationFrame(tick);}
+function move(d){if(!running)return;targetLane=Math.max(0,Math.min(2,targetLane+d));}
+function bindHold(id,down,up){
+ const el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('down');down();try{el.setPointerCapture(e.pointerId)}catch(_){}});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>el.addEventListener(ev,e=>{el.classList.remove('down');up&&up()}));
+}
+bindHold('left',()=>move(-1));bindHold('right',()=>move(1));
+bindHold('sprint',()=>{sprinting=true},()=>{sprinting=false});
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')move(-1);if(e.key==='ArrowRight'||e.key==='d')move(1);if(e.code==='Space'){e.preventDefault();sprinting=true;}});
+window.addEventListener('keyup',e=>{if(e.code==='Space')sprinting=false;});
+$('start').addEventListener('click',start);$('again').addEventListener('click',()=>{$('endPanel').classList.add('hidden');$('startPanel').classList.remove('hidden');start();});
+document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
+draw();
+})();
+</script>
+</div>
+</body>
+</html>
