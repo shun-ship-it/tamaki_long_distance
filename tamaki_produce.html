@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f6e9df">
+<title>田槙をプロデュース！</title>
+<style>
+:root{--ink:#382c32;--pink:#e87991;--cream:#fffaf5;--muted:#806f75;--line:#ead8d3;--gold:#d6a84e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#f6e9df;color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+#app{max-width:520px;min-height:100dvh;margin:auto;background:var(--cream);display:flex;flex-direction:column;box-shadow:0 0 28px #684b4b18}
+header{padding:18px 18px 12px;background:#f3d9dc;border-bottom:1px solid var(--line)}
+.kicker{font-size:11px;letter-spacing:.13em;color:#95636f;font-weight:800}
+h1{font-size:23px;line-height:1.2;margin:5px 0 4px}
+.sub{font-size:12px;color:#765f67}
+#stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:12px 14px 4px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.stat small{display:block;font-size:10px;color:var(--muted)}
+.stat b{font-size:17px}
+main{padding:12px 14px 18px;flex:1}
+#scene{background:linear-gradient(#f9e7e7,#fff5eb);border:1px solid var(--line);border-radius:14px;min-height:170px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+#avatar{font-size:76px;filter:drop-shadow(0 5px 2px #8b626222);line-height:1.4}
+#look{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:11px;color:#785f68}
+#chapter{font-size:11px;color:#a56b78;font-weight:800;margin:14px 0 4px}
+#story{font-size:15px;line-height:1.8;min-height:76px;white-space:pre-line}
+#choices{display:grid;gap:8px;margin-top:12px}
+.choice{width:100%;border:1px solid #e5c8ce;background:#fff;border-radius:11px;padding:12px;text-align:left;color:var(--ink);font:600 14px/1.45 inherit;box-shadow:0 2px 0 #eedde0;cursor:pointer}
+.choice:active{transform:translateY(1px);background:#fff1f3}
+.choice span{display:block;font-size:10px;color:#9a7a82;font-weight:500;margin-top:3px}
+#feedback{font-size:12px;color:#80636c;min-height:20px;margin-top:10px}
+footer{padding:10px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:8px}
+footer button{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;color:#765f67;font-weight:700}
+#restart{background:#f5dce0;color:#6f3c4a;border-color:#edc4cd}
+.meter{height:7px;background:#f0e4e3;border-radius:9px;overflow:hidden;margin-top:5px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,#ed9caf,#d76c86);width:0%}
+@media(min-height:780px){main{padding-top:16px}#scene{min-height:205px}#avatar{font-size:92px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="kicker">TAMAKI PRODUCE PROJECT</div><h1>田槙をプロデュース！</h1><div class="sub">垢抜けて、自分らしく。恋の行方は田槙しだい。</div></header>
+<section id="stats">
+ <div class="stat"><small>垢抜け度</small><b id="glow">0</b><div class="meter"><i id="glowbar"></i></div></div>
+ <div class="stat"><small>自信</small><b id="confidence">20</b><div class="meter"><i id="confbar"></i></div></div>
+ <div class="stat"><small>好感度</small><b id="affinity">0</b><div class="meter"><i id="affbar"></i></div></div>
+</section>
+<main>
+ <div id="scene"><div id="avatar">🧑🏻‍🦱</div><div id="look">現在の田槙：いつもの私服</div></div>
+ <div id="chapter">PROLOGUE</div>
+ <div id="story">田槙をもっと魅力的にプロデュースしよう！<br>服装・髪型・身だしなみ・会話・デート……選ぶのはキミ。<br>最後は気になるあの子に告白。相手の気持ちも大切にしよう。</div>
+ <div id="choices"><button class="choice" id="begin">プロデュース開始！<span>全5ステージ／選択でストーリーが変化</span></button></div>
+ <div id="feedback"></div>
+</main>
+<footer><button id="status">田槙の状態</button><button id="restart">最初から</button></footer>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let state={stage:0,glow:0,confidence:20,affinity:0,style:'いつもの私服',hair:'いつもの髪型',clean:false,kind:false,choiceLog:[]};
+const stages=[
+ {name:'STAGE 1 / FIRST IMPRESSION',story:'まずは見た目をアップデート！田槙の雰囲気を変えるなら、どこから？',opts:[
+  ['清潔感のあるシンプルコーデ','サイズ感の合う服と落ち着いた色を選ぶ',s=>{s.glow+=18;s.confidence+=8;s.style='清潔感コーデ';}],
+  ['トレンドを取り入れたストリート系','少し冒険して自分に似合う形を探す',s=>{s.glow+=15;s.confidence+=12;s.style='ストリートコーデ';}],
+  ['スポーツミックス','陸上部らしさを残して爽やかに',s=>{s.glow+=12;s.confidence+=10;s.style='スポーツミックス';}]
+ ]},
+ {name:'STAGE 2 / HAIR & GROOMING',story:'次は髪型と身だしなみ。細かいところが印象を変える！',opts:[
+  ['美容室で似合う髪型を相談','無理に流行を追わず、顔立ちに合うスタイルへ',s=>{s.glow+=18;s.confidence+=10;s.hair='似合わせヘア';}],
+  ['前髪と眉を整える','自然な清潔感を大切に',s=>{s.glow+=14;s.confidence+=8;s.hair='整えたヘア';}],
+  ['スキンケアと歯のケアを習慣に','毎日の積み重ねで好印象に',s=>{s.glow+=12;s.confidence+=7;s.clean=true;}]
+ ]},
+ {name:'STAGE 3 / PERSONALITY',story:'外見だけじゃなく中身も大事。田槙の魅力を伸ばそう。',opts:[
+  ['毎日あいさつして、相手の話を聞く','自然なコミュニケーションを積み重ねる',s=>{s.affinity+=18;s.confidence+=10;s.kind=true;}],
+  ['部活を頑張って目標に挑戦する','努力する姿は自分の自信にもつながる',s=>{s.confidence+=18;s.glow+=5;s.affinity+=8;}],
+  ['友達にも分け隔てなく優しくする','誰に対しても誠実な田槙を目指す',s=>{s.affinity+=15;s.confidence+=8;s.kind=true;}]
+ ]},
+ {name:'STAGE 4 / THE INVITATION',story:'少し仲良くなってきた。気になる子を誘ってみよう。どんな誘い方にする？',opts:[
+  ['「よかったら一緒に帰らない？」','短く自然に。相手の都合も聞く',s=>{s.affinity+=15;s.confidence+=8;}],
+  ['共通の好きなものの話から誘う','相手の興味を大切にする',s=>{s.affinity+=20;s.confidence+=6;}],
+  ['いきなり高級なお店に誘う','背伸びしすぎると相手も緊張するかも',s=>{s.affinity-=3;s.confidence+=2;}]
+ ]},
+ {name:'STAGE 5 / CONFESSION',story:'いよいよ告白の日。田槙はどんな言葉で気持ちを伝える？',opts:[
+  ['「前から好きでした。よかったら付き合ってください」','まっすぐ、相手が返事を考える時間も大切に',s=>{s.confidence+=10;s.affinity+=8;}],
+  ['「一緒にいると楽しい。もっと仲良くなりたい」','気持ちを伝えつつ、相手のペースを尊重する',s=>{s.confidence+=8;s.affinity+=12;}],
+  ['「返事は急がなくていいよ」','相手の気持ちを尊重する一言を添える',s=>{s.confidence+=12;s.affinity+=10;}]
+ ]}
+];
+function clamp(){state.glow=Math.min(100,Math.max(0,state.glow));state.confidence=Math.min(100,Math.max(0,state.confidence));state.affinity=Math.min(100,Math.max(0,state.affinity));}
+function renderStats(){clamp();$('glow').textContent=state.glow;$('confidence').textContent=state.confidence;$('affinity').textContent=state.affinity;$('glowbar').style.width=state.glow+'%';$('confbar').style.width=state.confidence+'%';$('affbar').style.width=state.affinity+'%';}
+function look(){let emoji='🧑🏻‍🦱';if(state.glow>=55)emoji='🧑🏻‍🎤';else if(state.glow>=25)emoji='🧑🏻';$('avatar').textContent=emoji;$('look').textContent=`田槙：${state.style} ／ ${state.hair}`;}
+function showStage(){
+ const st=stages[state.stage];$('chapter').textContent=st.name;$('story').textContent=st.story;$('choices').innerHTML='';
+ st.opts.forEach(([title,desc,fn],i)=>{let b=document.createElement('button');b.className='choice';b.innerHTML=title+'<span>'+desc+'</span>';b.addEventListener('click',()=>{fn(state);state.choiceLog.push(title);renderStats();look();state.stage++;if(state.stage<stages.length)showStage();else ending();});$('choices').appendChild(b);});
+ $('feedback').textContent='選択によって田槙の成長と恋の展開が変わるよ。';
+}
+function ending(){
+ $('chapter').textContent='FINAL / THE ANSWER';
+ let score=state.affinity+state.confidence*.35+state.glow*.15;
+ let title,msg;
+ if(score>=75&&state.affinity>=45){title='🌸 うれしい返事！';msg='「うん、こちらこそよろしくね！」\\n田槙の気持ちが届いた！おめでとう！\\n大切なのは、垢抜けたことだけじゃなく、相手を思いやって自分らしく伝えたこと。';}
+ else if(score>=48){title='💌 これからに期待';msg='「もう少しお互いのことを知ってからでもいい？」\\nすぐに答えは出なかったけれど、田槙の誠実さは伝わったみたい。焦らず、相手の気持ちを尊重しよう。';}
+ else{title='🍃 新しい一歩';msg='今回は恋が実らなかった。でも、田槙は前より自分に自信がついた。相手の返事を受け止めて、自分らしく進んでいこう。';}
+ $('story').textContent=title+'\\n\\n'+msg;$('choices').innerHTML='';
+ let b=document.createElement('button');b.className='choice';b.textContent='もう一度プロデュースする';b.onclick=reset;$('choices').appendChild(b);
+ $('feedback').textContent=`最終結果：垢抜け度 ${state.glow} ／ 自信 ${state.confidence} ／ 好感度 ${state.affinity}`;
+}
+function reset(){state={stage:0,glow:0,confidence:20,affinity:0,style:'いつもの私服',hair:'いつもの髪型',clean:false,kind:false,choiceLog:[]};renderStats();look();$('chapter').textContent='PROLOGUE';$('story').textContent='田槙をもっと魅力的にプロデュースしよう！\\n服装・髪型・身だしなみ・会話・デート……選ぶのはキミ。\\n最後は気になるあの子に告白。相手の気持ちも大切にしよう。';$('choices').innerHTML='<button class="choice" id="begin">プロデュース開始！<span>全5ステージ／選択でストーリーが変化</span></button>';$('begin').onclick=showStage;$('feedback').textContent='';}
+$('begin').onclick=showStage;
+$('restart').onclick=reset;
+$('status').onclick=()=>{$('feedback').textContent=`現在：${state.style}・${state.hair}｜選択 ${state.choiceLog.length}回`;};
+renderStats();look();
+})();
+</script>
+</body></html>
