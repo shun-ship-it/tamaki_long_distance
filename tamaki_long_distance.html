@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#10251e">
+<title>田槙の長距離トレーニング｜尽誠学園高校</title>
+<style>
+:root{color-scheme:dark;--ink:#f5f7f3;--muted:#a9b9ae;--panel:#172b24;--line:#365044;--lime:#c9ef85}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#294b3b,#101d18 70%);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif}
+main{max-width:1040px;margin:auto;padding:18px 14px 30px}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}.eyebrow{color:#b7d69a;font-size:12px;letter-spacing:.15em;font-weight:800}.top h1{font-size:clamp(21px,4vw,34px);line-height:1.15;margin:5px 0 0}.top p{color:var(--muted);font-size:12px;margin:6px 0 0}.pill{border:1px solid #567563;color:#d8edca;padding:7px 11px;border-radius:999px;font-size:11px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}.stat{background:#182d25;border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:clamp(16px,3vw,22px);font-variant-numeric:tabular-nums;margin-top:2px}
+.game-wrap{position:relative;border:1px solid #587160;border-radius:17px;overflow:hidden;background:#66845e;box-shadow:0 20px 55px #0007}.game-wrap canvas{display:block;width:100%;height:auto;aspect-ratio:16/10;touch-action:none}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:#07140ec9;padding:20px;text-align:center}.dialog{max-width:430px;background:#14271f;border:1px solid #66816d;border-radius:18px;padding:24px 22px;box-shadow:0 15px 50px #0008}.dialog .big{font-size:48px}.dialog h2{font-size:24px;margin:8px 0}.dialog p{color:#c0cec4;font-size:13px;line-height:1.8}.btn{border:0;border-radius:12px;background:var(--lime);color:#14251b;font-weight:900;padding:12px 20px;font-size:15px;cursor:pointer}.btn:active{transform:translateY(1px)}.hud{position:absolute;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.hud span{background:#101c18c9;border:1px solid #ffffff25;border-radius:9px;padding:7px 10px;font-size:11px;font-weight:800}
+.bottom{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:12px}.message{min-height:44px;background:#172b24;border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:13px;color:#d8e7dc}.message b{color:var(--lime)}.controls{display:flex;gap:7px}.controls button,.pad button{border:1px solid #506b5b;background:#1b3429;color:#f3f8f2;border-radius:11px;padding:10px 13px;font-weight:800;cursor:pointer}.controls button:active,.pad button:active{background:#365842}.help{font-size:11px;color:var(--muted);line-height:1.7;margin:10px 2px 0}.pad{display:none;grid-template-columns:repeat(3,48px);gap:5px;justify-content:center;margin-top:12px}.pad button{height:44px;padding:0;font-size:18px;touch-action:none}
+@media(max-width:650px){main{padding:13px 10px 24px}.top{align-items:flex-start}.pill{font-size:10px}.stats{grid-template-columns:repeat(4,1fr);gap:5px}.stat{padding:7px 8px}.stat small{font-size:10px}.bottom{grid-template-columns:1fr}.controls{justify-content:stretch}.controls button{flex:1}.pad{display:grid}.game-wrap canvas{aspect-ratio:4/5}.hud{top:8px;left:8px;right:8px}.hud span{font-size:10px;padding:6px 8px}}
+</style>
+</head>
+<body>
+<main>
+ <header class="top"><div><div class="eyebrow">JINSEI GAKUEN · TRACK & FIELD</div><h1>田槙の長距離トレーニング</h1><p>尽誠学園高校・陸上競技部／長距離メニュー</p></div><div class="pill">TOP-DOWN ACTION</div></header>
+ <section class="stats" aria-label="ゲーム状況">
+  <div class="stat"><small>走行距離</small><strong id="distance">0 <small style="display:inline">m</small></strong></div>
+  <div class="stat"><small>ペース</small><strong id="pace">4'30"</strong></div>
+  <div class="stat"><small>田槙発見</small><strong id="found">0 人</strong></div>
+  <div class="stat"><small>スタミナ</small><strong id="stamina">100%</strong></div>
+ </section>
+ <div class="game-wrap">
+  <canvas id="game" width="960" height="600" aria-label="尽誠学園高校の陸上トラックを走るゲーム"></canvas>
+  <div class="hud"><span id="lap">TRAINING · 0 / 1600 m</span><span id="phase">EASY RUN</span></div>
+  <div class="overlay" id="overlay"><div class="dialog"><div class="eyebrow">JINSEI GAKUEN · OFFICIAL TRAINING</div><div class="big">🏃‍♂️</div><h2>田槙の長距離トレーニング</h2><p>主人公は田槙。ほかの部員は山田・佐藤・中村たち。<br>尽誠学園高校の陸上トラックで1600m走に挑戦！<br>仲間を見つけながらコーンを避けよう。<br>途中からコーチや部員の激励が吹き出しで届くぞ！</p><button class="btn" id="start">トレーニング開始</button></div></div>
+ </div>
+ <div class="bottom"><div class="message" id="message">準備運動完了。田槙、スタート位置へ！</div><div class="controls"><button id="boost">⚡ ラストスパート</button><button id="restart">↻ リスタート</button></div></div>
+ <div class="pad" aria-label="移動操作"><span></span><button data-key="up">▲</button><span></span><button data-key="left">◀</button><button data-key="down">▼</button><button data-key="right">▶</button></div>
+ <p class="help">操作：WASD／矢印キー／画面の方向ボタン。スマホは方向ボタンで移動。障害物にぶつかるとスタミナが減少。田槙に近づくと発見数が増える。1600m完走を目指そう！</p>
+</main>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),$=id=>document.getElementById(id);
+const W=960,H=600,TARGET=1600;
+let state='ready',last=0,time=0,distance=0,stamina=100,found=0,player,cones,teammates,speech,boost=0,shake=0,keys={},bubbleTimer=0,cheerIndex=0;
+const cheers=[
+ ['コーチ','田槙！がんばれ！'],['部員','田槙！その調子！'],['コーチ','フォームを崩すな、田槙！'],['部員','田槙！がんばれ！'],['部員','あと少し！田槙！'],['コーチ','いい走りだ、田槙！']
+];
+const rand=(a,b)=>a+Math.random()*(b-a);
+function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function reset(){
+ distance=0;stamina=100;found=0;time=0;boost=0;shake=0;bubbleTimer=0;cheerIndex=0;
+ player={x:475,y:430,dx:0,dy:0,anim:0};
+ cones=[];teammates=[];speech=null;
+ const roster=['山田','佐藤','中村','高橋','小林','伊藤','渡辺','吉田','山本','松本','井上','木村','林','清水','森','池田','橋本','阿部'];
+ for(let i=0;i<roster.length;i++)teammates.push({name:roster[i],x:rand(115,845),y:rand(85,520),phase:rand(0,7),found:false,shirt:i%2?'#e8e8d9':'#b6cfaa'});
+ for(let i=0;i<13;i++)cones.push({x:rand(100,860),y:rand(90,520),r:rand(10,15),hit:false});
+ updateHUD();draw();
+}
+function track(){
+ // grass field and running oval
+ ctx.fillStyle='#6f9664';ctx.fillRect(0,0,W,H);
+ for(let i=0;i<18;i++){ctx.strokeStyle=i%2?'#7da16d':'#789b68';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(i*59,0);ctx.lineTo(i*59,H);ctx.stroke()}
+ // track lanes, slightly angled oval
+ ctx.fillStyle='#b56f50';ctx.beginPath();ctx.ellipse(480,300,410,255,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e3b18a';ctx.beginPath();ctx.ellipse(480,300,382,227,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#b56f50';ctx.beginPath();ctx.ellipse(480,300,350,195,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e3b18a';ctx.beginPath();ctx.ellipse(480,300,322,167,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#b56f50';ctx.beginPath();ctx.ellipse(480,300,290,135,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#d9e2b0';ctx.beginPath();ctx.ellipse(480,300,257,102,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#f8dfbd';ctx.lineWidth=2;
+ [366,394,422].forEach((r,i)=>{ctx.beginPath();ctx.ellipse(480,300,410-i*28,255-i*28,0,0,Math.PI*2);ctx.stroke()});
+ // center field
+ ctx.fillStyle='#72986a';ctx.beginPath();ctx.ellipse(480,300,245,90,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#a9c28d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(480,300,225,73,0,0,Math.PI*2);ctx.stroke();
+ // markings
+ ctx.strokeStyle='#fff1d7';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(480,48);ctx.lineTo(480,110);ctx.stroke();
+ ctx.fillStyle='#f4e8d1';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText('JINSEI GAKUEN',480,290);
+ ctx.font='bold 13px sans-serif';ctx.fillText('TRACK & FIELD',480,312);
+ // school building and trees
+ rounded(28,20,170,53,8,'#334f40');ctx.fillStyle='#f3f0d9';ctx.font='bold 16px sans-serif';ctx.fillText('尽誠学園高校',113,52);
+ for(let i=0;i<7;i++){let x=230+i*85;ctx.fillStyle='#355f3c';ctx.beginPath();ctx.arc(x,34+(i%2)*12,16,0,7);ctx.fill()}
+ // benches on perimeter
+ rounded(760,18,130,40,7,'#735b43');ctx.fillStyle='#f7e8cf';ctx.font='12px sans-serif';ctx.fillText('陸上競技部',825,43);
+}
+function person(x,y,label,shirt,scale=1,phase=0,isPlayer=false){
+ ctx.save();ctx.translate(x,y+Math.sin(phase)*2);ctx.scale(scale,scale);
+ // shadow
+ ctx.fillStyle='#17251b55';ctx.beginPath();ctx.ellipse(0,16,14,5,0,0,7);ctx.fill();
+ // legs
+ let swing=Math.sin(phase*2)*5;
+ ctx.strokeStyle='#202a28';ctx.lineWidth=5;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(-4,7);ctx.lineTo(-6+swing,19);ctx.moveTo(4,7);ctx.lineTo(6-swing,19);ctx.stroke();
+ // torso, arms
+ rounded(-9,-12,18,22,5,shirt);
+ ctx.strokeStyle='#d9b08c';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-8,-7);ctx.lineTo(-14+swing*.5,2);ctx.moveTo(8,-7);ctx.lineTo(14-swing*.5,2);ctx.stroke();
+ // head
+ ctx.fillStyle='#d9ad89';ctx.beginPath();ctx.arc(0,-19,8,0,7);ctx.fill();
+ ctx.fillStyle='#30302a';ctx.beginPath();ctx.arc(0,-22,8,Math.PI,Math.PI*2);ctx.fill();
+ if(isPlayer){ctx.strokeStyle='#f8e48b';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,-19,13,0,7);ctx.stroke()}
+ ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.fillText(label,0,-1);
+ ctx.restore();
+}
+function bubble(speaker,msg,x,y){
+ ctx.save();ctx.font='bold 19px sans-serif';let w=Math.max(180,ctx.measureText(msg).width+30),h=62;
+ let bx=Math.max(12,Math.min(W-w-12,x-w/2)),by=Math.max(12,y-105);
+ ctx.shadowColor='#0008';ctx.shadowBlur=12;rounded(bx,by,w,h,13,'#fffdf3');ctx.shadowBlur=0;
+ ctx.fillStyle='#fffdf3';ctx.beginPath();ctx.moveTo(x-8,by+h-2);ctx.lineTo(x+3,by+h+13);ctx.lineTo(x+12,by+h-2);ctx.fill();
+ ctx.fillStyle='#52715c';ctx.font='bold 11px sans-serif';ctx.textAlign='left';ctx.fillText(speaker,bx+13,by+17);
+ ctx.fillStyle='#26382b';ctx.font='bold 19px sans-serif';ctx.fillText(msg,bx+13,by+43);
+ ctx.restore();
+}
+function draw(){
+ ctx.save();if(shake>0){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.86}
+ track();
+ // teammates and cones
+ teammates.forEach(t=>{if(!t.found){person(t.x,t.y,t.name,t.shirt,.82,t.phase+time*.8);}});
+ cones.forEach(o=>{if(!o.hit){ctx.fillStyle='#f4f1df';ctx.beginPath();ctx.ellipse(o.x,o.y+7,13,5,0,0,7);ctx.fill();ctx.fillStyle='#f07835';ctx.beginPath();ctx.moveTo(o.x,o.y-13);ctx.lineTo(o.x-10,o.y+8);ctx.lineTo(o.x+10,o.y+8);ctx.closePath();ctx.fill();ctx.fillStyle='#fff0d7';ctx.fillRect(o.x-6,o.y-1,12,3)}});
+ // coach stands near edge
+ person(855,130,'COACH','#263c4b',1.02,time*1.3,false);
+ ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('COACH',855,155);
+ person(player.x,player.y,'田槙','#d7b74d',1.25,player.anim,true);
+ if(speech&&speech.life>0)bubble(speech.speaker,speech.msg,speech.x,speech.y);
+ // finish line
+ ctx.fillStyle='#f8f0dc';ctx.fillRect(480,42,8,35);ctx.fillStyle='#29382d';ctx.font='bold 11px sans-serif';ctx.fillText('FINISH',510,55);
+ ctx.restore();
+}
+function updateHUD(){
+ $('distance').innerHTML=Math.floor(distance)+' <small style="display:inline">m</small>';
+ $('found').textContent=found+' 人';$('stamina').textContent=Math.ceil(stamina)+'%';
+ $('pace').textContent=boost>0?'全力！':(stamina<30?"5'40\"":"4'30\"");
+ $('lap').textContent='TRAINING · '+Math.floor(distance)+' / '+TARGET+' m';
+ $('phase').textContent=distance<400?'WARM UP':distance<1100?'PACE RUN':'FINAL LAP';
+}
+function sayCheer(){
+ let [speaker,msg]=cheers[cheerIndex%cheers.length];cheerIndex++;
+ speech={speaker,msg,x:player.x,y:player.y,life:190};
+ $('message').innerHTML='<b>'+speaker+'：</b>「'+msg+'」';
+}
+function finish(win){
+ state='finished';$('overlay').style.display='grid';
+ $('overlay').innerHTML='<div class="dialog"><div class="big">'+(win?'🏆':'💦')+'</div><h2>'+(win?'田槙、1600m完走！':'田槙、ここで一度給水！')+'</h2><p>走行距離：'+Math.floor(distance)+'m<br>発見した田槙：'+found+'人<br>'+(win?'コーチも部員も大歓声！最高のトレーニングだ。':'スタミナを回復して、もう一度挑戦しよう。')+'</p><button class="btn" id="again">もう一度走る</button></div>';
+ $('again').onclick=start;
+}
+function tick(dt){
+ if(state!=='playing')return;
+ time+=dt;let fast=boost>0;let speed=fast?190:105;
+ if(fast){boost-=dt;stamina-=dt*8}else stamina-=dt*1.1;
+ let dx=(keys.right||keys.ArrowRight||keys.d?1:0)-(keys.left||keys.ArrowLeft||keys.a?1:0);
+ let dy=(keys.down||keys.ArrowDown||keys.s?1:0)-(keys.up||keys.ArrowUp||keys.w?1:0);
+ let len=Math.hypot(dx,dy)||1;player.x=Math.max(65,Math.min(895,player.x+dx/len*speed*dt));player.y=Math.max(75,Math.min(535,player.y+dy/len*speed*dt));
+ player.anim+=dt*11;distance+=speed*dt*.48;
+ if(speech){speech.life-=dt*60;if(speech.life<=0)speech=null}
+ bubbleTimer+=dt;
+ if(distance>180&&bubbleTimer>7){sayCheer();bubbleTimer=0}
+ teammates.forEach(t=>{t.phase+=dt*2;if(!t.found&&Math.hypot(t.x-player.x,t.y-player.y)<27){t.found=true;found++;$('message').innerHTML='<b>'+t.name+'を発見！</b> 田槙が'+t.name+'と合流した！';}});
+ cones.forEach(o=>{if(!o.hit&&Math.hypot(o.x-player.x,o.y-player.y)<24){o.hit=true;stamina-=13;shake=7;$('message').textContent='コーンに接触！足元に注意、田槙！'}});
+ stamina=Math.max(0,Math.min(100,stamina));
+ if(stamina<=0){finish(false);return}
+ if(distance>=TARGET){distance=TARGET;updateHUD();finish(true);return}
+ updateHUD();
+}
+function frame(ts){if(state!=='playing')return;let dt=Math.min(.04,(ts-last)/1000||.016);last=ts;tick(dt);draw();if(state==='playing')requestAnimationFrame(frame)}
+function start(){reset();state='playing';$('overlay').style.display='none';last=0;requestAnimationFrame(frame);$('message').textContent='スタート！田槙、いいペースで入ろう！'}
+$('start').onclick=start;$('restart').onclick=()=>{state='ready';reset();$('overlay').style.display='grid';$('overlay').innerHTML='<div class="dialog"><div class="big">🏃‍♂️</div><h2>田槙、再スタート。</h2><p>尽誠学園高校のトラックへ戻ろう。</p><button class="btn" id="start2">トレーニング開始</button></div>';$('start2').onclick=start};
+$('boost').onclick=()=>{if(state==='playing'&&stamina>12){boost=2.5;$('message').innerHTML='<b>田槙、ラストスパート！！</b>'}};
+document.addEventListener('keydown',e=>{let k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;if(k===' '&&state==='playing'&&stamina>12)boost=2.5});
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
+reset();
+})();
+</script>
+</body>
+</html>
